@@ -64,72 +64,37 @@ window.addEventListener("resize", () => {
 
 const gui = new GUI();
 
-// 加载模型背景
-const gltfLoader = new GLTFLoader();
+// 加载环境贴图
 const rgbeLoader = new RGBELoader();
-const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath("./draco/");
-gltfLoader.setDRACOLoader(dracoLoader);
-
-rgbeLoader.load("../texture/Alex_Hart-Nature_Lab_Bones_2k.hdr", (envMap) => {
+rgbeLoader.load("./texture/Alex_Hart-Nature_Lab_Bones_2k.hdr", (envMap) => {
+  // 设置球型贴图
   envMap.mapping = THREE.EquirectangularReflectionMapping;
+  // 设置环境贴图
   scene.environment = envMap;
+  // 设置场景背景
   scene.background = envMap;
 });
 
-gltfLoader.load("./model/building.glb", (gltf) => {
-  // scene.add(gltf.scene);
+// 加载鸭子
+// 实例化加载器gltf
+const gltfLoader = new GLTFLoader();
 
-  // 边缘结合体
-  // 先拿到模型的geometry
-  const building = gltf.scene.children[0];
-  const geometry = building.geometry;
+gltfLoader.load("./model/Duck.glb", (gltf) => {
+  console.log(gltf);
+  scene.add(gltf.scene);
 
-  // 边缘几何体
-  const EdgesGeometry = new THREE.EdgesGeometry(geometry);
-  // 线框几何体
-  const wireframeGeometry = new THREE.WireframeGeometry(geometry);
+  let duckMesh = gltf.scene.getObjectByName("LOD3spShape");
 
-  const lineBasicMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
-  const edges = new THREE.LineSegments(wireframeGeometry, lineBasicMaterial);
-
-  // 拿到坐标
-  building.updateWorldMatrix(true, true);
-  edges.matrix.copy(building.matrixWorld);
-  edges.matrix.decompose(edges.position, edges.quaternion, edges.scale);
-
-  // scene.add(edges);
-});
-
-// 实现将城市都变成线段
-
-gltfLoader.load("./model/city.glb", (gltf) => {
-  gltf.scene.traverse((child) => {
-    if (child.isMesh) {
-      // 边缘结合体
-      // 先拿到模型的geometry
-      const building = child;
-      const geometry = building.geometry;
-
-      // 边缘几何体
-      const EdgesGeometry = new THREE.EdgesGeometry(geometry);
-      // 线框几何体
-      const wireframeGeometry = new THREE.WireframeGeometry(geometry);
-
-      const lineBasicMaterial = new THREE.LineBasicMaterial({
-        color: 0xffffff,
-      });
-      const edges = new THREE.LineSegments(
-        EdgesGeometry,
-        lineBasicMaterial
-      );
-
-      // 拿到坐标
-      building.updateWorldMatrix(true, true);
-      edges.matrix.copy(building.matrixWorld);
-      edges.matrix.decompose(edges.position, edges.quaternion, edges.scale);
-
-      scene.add(edges);
-    }
-  });
+  const duckGeometry = duckMesh.geometry;
+  // 计算包围盒
+  duckGeometry.computeBoundingBox();
+  // 获取duck包围盒
+  let duckBox = duckGeometry.boundingBox;
+  // 更新世界矩阵 不更新的话 包围盒很大
+  duckMesh.updateMatrixWorld(true, true);
+  duckBox.applyMatrix4(duckMesh.matrixWorld);
+  
+  // 创建包围盒辅助器
+  const boxHelper = new THREE.Box3Helper(duckBox, 0xffff00);
+  scene.add(boxHelper);
 });
