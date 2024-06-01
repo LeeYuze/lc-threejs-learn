@@ -26,10 +26,10 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // 设置相机
-camera.position.z = 0;
-camera.position.y = 1.8;
-camera.position.x = 5;
-camera.lookAt(0, 1.2, 0);
+camera.position.z = 2;
+camera.position.y = 0;
+camera.position.x = 0;
+camera.lookAt(0, 0, 0);
 
 // 添加时间坐标辅助器
 const axesHelper = new THREE.AxesHelper(5);
@@ -43,23 +43,23 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 // 自动旋转
 controls.autoRotate = false;
-// 设置看的高度
-controls.target.set(0, 1.2, 0);
+// // 设置看的高度
+// controls.target.set(0, 1.2, 0);
 // 禁用平移
-controls.enablePan = false
+// controls.enablePan = false
 
-controls.minDistance = 3
-controls.maxDistance = 5.5
+// controls.minDistance = 3
+// controls.maxDistance = 5.5
 
-// 垂直最小
-controls.minPolarAngle = Math.PI / 2 - Math.PI / 20
-// 垂直最大
-controls.maxPolarAngle = Math.PI / 2 + Math.PI / 20
+// // 垂直最小
+// controls.minPolarAngle = Math.PI / 2 - Math.PI / 20
+// // 垂直最大
+// controls.maxPolarAngle = Math.PI / 2 + Math.PI / 20
 
-// 水平最小
-controls.minAzimuthAngle =  Math.PI / 2 - Math.PI / 20
-// 水平最大
-controls.maxAzimuthAngle =  Math.PI / 2 + Math.PI / 20
+// // 水平最小
+// controls.minAzimuthAngle =  Math.PI / 2 - Math.PI / 20
+// // 水平最大
+// controls.maxAzimuthAngle =  Math.PI / 2 + Math.PI / 20
 
 function animate() {
   controls.update();
@@ -93,16 +93,36 @@ const textureLoader = new THREE.TextureLoader();
 dracoLoader.setDecoderPath("./draco/");
 gltfLoader.setDRACOLoader(dracoLoader);
 
-rgbeLoader.load("./texture/Alex_Hart-Nature_Lab_Bones_2k.hdr", (envMap) => {
-  // 反射
-  // envMap.mapping = THREE.EquirectangularReflectionMapping;
-  // 折射
-  envMap.mapping = THREE.EquirectangularRefractionMapping;
+// rgbeLoader.load("./texture/Alex_Hart-Nature_Lab_Bones_2k.hdr", (envMap) => {
+//   // 反射
+//   // envMap.mapping = THREE.EquirectangularReflectionMapping;
+//   // 折射
+//   envMap.mapping = THREE.EquirectangularRefractionMapping;
 
-  scene.environment = envMap;
-  scene.background = envMap;
+//   scene.environment = envMap;
+//   scene.background = envMap;
+// });
+
+const watercoverTexture = textureLoader.load("./texture/amber/base_color.jpg");
+
+// watercoverTexture.repeat.set(4,4)
+// 水平 普通重复
+// watercoverTexture.wrapS = THREE.RepeatWrapping
+// 水平 镜像重复
+// watercoverTexture.wrapS = THREE.MirroredRepeatWrapping
+// // 垂直
+// // watercoverTexture.wrapT = THREE.RepeatWrapping
+// watercoverTexture.wrapT = THREE.MirroredRepeatWrapping
+
+// watercoverTexture.offset.set(0.5, 0.5);
+
+const planeGeometry = new THREE.PlaneGeometry(1, 1);
+const planeMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffffff,
+  map: watercoverTexture,
+  // transparent: true,
 });
 
-gltfLoader.load("./model/liveroom-scene.glb", (gltf) => {
-  scene.add(gltf.scene);
-});
+const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+scene.add(plane);
